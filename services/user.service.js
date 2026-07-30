@@ -39,6 +39,39 @@ const createUser = async (data) => {
     return user;
 }
 
+
+const loginUser = async (data) => {
+
+    const { credentials, password } = data;
+
+    if (!credentials || !password) {
+        throw new AppError("All fields required", 400)
+    }
+
+    const user = await User.findOne({
+        $or: [
+            { email: credentials },
+            { first_name: credentials }
+        ]
+    })
+
+    if (!user) {
+        throw new AppError("Invalid credentials", 401)
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+        throw new AppError("Invalid credentials", 401)
+    }
+
+    const userData = user.toObject();
+    delete userData.password;
+
+    return userData;
+}
+
 module.exports =  {
-    createUser
+    createUser,
+    loginUser
 }

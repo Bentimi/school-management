@@ -13,6 +13,20 @@ const create_User = async (req, res, next) => {
     }
 }
 
+
+const login_User = async (req, res, next) => {
+    try {
+        const data = req.body;
+        const user = await userService.loginUser(req.body);
+        
+       res.success({ user }, "Login successful")
+
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
-    create_User
+    create_User,
+    login_User
 }

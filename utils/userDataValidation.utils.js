@@ -15,7 +15,13 @@ const userSchema = joi.object({
     })
 })
 
+const loginSchema = joi.object({
+    credentials: joi.string().trim().required(),
+    password: joi.string().trim().required()
+})
+
 
 module.exports = {
-    validatedUserSchema : validate(userSchema)
+    validatedUserSchema : validate(userSchema),
+    validatedLoginSchema : validate(loginSchema)
 }

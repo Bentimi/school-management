@@ -1,6 +1,6 @@
 const userService = require("../services/user.service")
 const jwt = require('jsonwebtoken');
-// const { v4: uuidv4 } = require("uuid");
+const { generateCsrfToken } = require("../utils/random.utils");
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -10,6 +10,8 @@ const cookieOptions = (maxAge) => ({
     sameSite: isProduction ? 'none' : 'strict',
     maxAge
 });
+
+const csrfToken = generateCsrfToken()
 
 
 const create_User = async (req, res, next) => {
@@ -53,12 +55,13 @@ const login_User = async (req, res, next) => {
             cookieOptions(7 * 24 * 60 * 60 * 1000) 
         );
 
-        // const csrfToken = uuidv4();
-        // res.cookie('csrfToken', csrfToken, {
-        //     httpOnly: true,
-        //     secure: isProduction,
-        //     sameSite: isProduction ? 'none' : 'strict',
-        // });
+        res.cookie('csrfToken', 
+            csrfToken, {
+            httpOnly: false,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 
+        });
 
         res.cookie('accessToken', 
             accessToken,

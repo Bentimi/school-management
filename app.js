@@ -8,11 +8,11 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const { responseHandler } = require("./middleware/responseHandler.middleware");
 const { errorHandler } = require("./middleware/errorHandler.middleware");
 const UserRoutes = require("./routes/user.routes");
-const dotenv = require("dotenv");
+const passport = require("passport");
 
 const app = express();
 
-dotenv.config();
+require("dotenv").config();
 
 // Middlewares
 app.use(cors());
@@ -20,7 +20,7 @@ app.use(helmet());
 app.use(morgan("combined"));
 app.use(express.json());
 app.use(bodyParser.json())
-
+app.use(passport.initialize());
 
 // app.use(responseHandler);
 
@@ -58,6 +58,8 @@ const swaggerOptions = {
         res.send("Hello word, welcome to School Management System")
    })
 
+   app.use(responseHandler)
+   
    app.use("/account", UserRoutes)
 
    app.use(errorHandler)

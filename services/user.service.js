@@ -28,7 +28,7 @@ const createUser = async (data) => {
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
-        password: data.password
+        password: hashedPwd
     })
 
     await newUser.save();
@@ -71,7 +71,18 @@ const loginUser = async (data) => {
     return userData;
 }
 
+const getUserById = async (id) => {
+    const user = await User.findById(id).select('-password');
+
+    if (!user) {
+        throw new AppError("User not found", 404);
+    } 
+    
+    return user;
+}
+
 module.exports =  {
     createUser,
-    loginUser
+    loginUser,
+    getUserById
 }

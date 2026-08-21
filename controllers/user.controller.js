@@ -42,7 +42,7 @@ const login_User = async (req, res, next) => {
 
         const newRefreshToken = jwt.sign(
             payload, 
-            process.env.JWT_SECRET, 
+            process.env.JWT_REFRESH_SECRET, 
             { expiresIn: '7d' }
         );
 

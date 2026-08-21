@@ -1,6 +1,6 @@
 const { Strategy, ExtractJwt } = require('passport-jwt');
 const passport = require('passport');
-const userService = require('../services/user.service'); 
+const userService = require('../services/user.service');
 
 
 // Cookie Extractor
@@ -14,10 +14,7 @@ const cookieExtractor = (req) => {
 
 // Configuration options for the JWT strategy
 const options = {
-  jwtFromRequest: ExtractJwt.fromExtractors([
-    ExtractJwt.fromAuthHeaderAsBearerToken(),
-    cookieExtractor
-  ]),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_SECRET
 };
 

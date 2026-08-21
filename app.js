@@ -9,6 +9,7 @@ const { responseHandler } = require("./middleware/responseHandler.middleware");
 const { errorHandler } = require("./middleware/errorHandler.middleware");
 const UserRoutes = require("./routes/user.routes");
 const passport = require("passport");
+const cookieParser = require("cookie-parser") 
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("combined"));
 app.use(express.json());
+app.use(cookieParser());
 app.use(bodyParser.json())
 app.use(passport.initialize());
 

@@ -73,7 +73,7 @@ const loginUser = async (data) => {
 }
 
 const getUserById = async (id) => {
-    const user = await User.findById(id).select('-password');
+    const user = await User.findById(id).select('-password -refreshTokens');
 
     if (!user) {
         throw new AppError("User not found", 404);

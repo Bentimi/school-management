@@ -2,9 +2,22 @@ const { Strategy, ExtractJwt } = require('passport-jwt');
 const passport = require('passport');
 const userService = require('../services/user.service'); 
 
+
+// Cookie Extractor
+
+const cookieExtractor = (req) => {
+  if (req && req.cookies) {
+    return req.cookies.accessToken || null;
+  }
+  return null;
+}
+
 // Configuration options for the JWT strategy
 const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJwt.fromExtractors([
+    ExtractJwt.fromAuthHeaderAsBearerToken(),
+    cookieExtractor
+  ]),
   secretOrKey: process.env.JWT_SECRET
 };
 
@@ -16,9 +29,10 @@ passport.use(
       const user = await userService.getUserById(jwtPayload.id); 
 
       if (user) {
+        
         // Token is valid; attach user object to req.user
-
         console.log("User found:", user);
+
         return done(null, user);
       } else {
         // User not found in database

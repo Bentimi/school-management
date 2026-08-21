@@ -2,6 +2,15 @@ const userService = require("../services/user.service")
 const jwt = require('jsonwebtoken');
 // const { v4: uuidv4 } = require("uuid");
 
+const isProduction = process.env.NODE_ENV === 'production'
+
+const cookieOptions = (maxAge) => ({
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'strict',
+    maxAge
+});
+
 
 const create_User = async (req, res, next) => {
     try {
@@ -22,30 +31,27 @@ const login_User = async (req, res, next) => {
         const user = await userService.loginUser(req.body);
 
          const payload = { 
-            id: user._id || user.id,
+            id: user._id,
         };
 
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             payload, 
             process.env.JWT_SECRET, 
-            { expiresIn: '1d' }
+            { expiresIn: '15m' }
         );
 
-        res.success(
-            { 
-                user, 
-                token: `Bearer ${token}` 
-            }, 
-            "Login successful"
+        const newRefreshToken = jwt.sign(
+            payload, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '7d' }
         );
 
+        await userService.saveRefreshToken(user._id, newRefreshToken)
        
-        res.cookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-        });
+        res.cookie('refreshToken', 
+            newRefreshToken, 
+            cookieOptions(7 * 24 * 60 * 60 * 1000) 
+        );
 
         // const csrfToken = uuidv4();
         // res.cookie('csrfToken', csrfToken, {
@@ -54,17 +60,15 @@ const login_User = async (req, res, next) => {
         //     sameSite: isProduction ? 'none' : 'strict',
         // });
 
-        res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'none' : 'strict',
-            maxAge: 15 * 60 * 1000 // 15 minutes
-        });
+        res.cookie('accessToken', 
+            accessToken,
+            cookieOptions(15 * 60 * 1000)
+        );
        
-        // res.success({ user }, "Login successful")
+        res.success({ user }, "Login successful")
 
     } catch (e) {
-        console.log(e)
+        // console.log(e)
         next(e);
     }
 }

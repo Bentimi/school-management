@@ -48,7 +48,18 @@ const userSchema = new mongoose.Schema({
     last_login: {
         type: Date,
         default: null
-    }
+    },
+    refreshTokens: [{
+        token: {
+            type: String,
+            required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            expires: '7d'
+        }
+    }]
 }, {
     timestamps: true,
     versionKey: false

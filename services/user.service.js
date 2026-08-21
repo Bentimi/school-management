@@ -67,6 +67,7 @@ const loginUser = async (data) => {
 
     const userData = user.toObject();
     delete userData.password;
+    delete userData.refreshTokens;
 
     return userData;
 }
@@ -81,8 +82,54 @@ const getUserById = async (id) => {
     return user;
 }
 
+// Save a new refresh token
+const saveRefreshToken = async (userId, token) => {
+    await User.findByIdAndUpdate(userId, {
+        $push: {
+            refreshTokens: {
+                token, createdAt: new Date()
+            }
+        }
+    })
+}
+
+// Revoke specific refresh token
+const revokeRefreshToken = async (userId, token) => {
+    await User.findByIdAndUpdate(userId, {
+        $pull: {
+            refreshTokens: {
+                token
+            }
+        }
+    })
+}
+
+// Check for refresh token validity 
+const isRefreshTokenValid = async (userId, token) => {
+    const user = await User.findById(userId).select("refreshTokens");
+
+    if (!user) return false;
+    return user.refreshTokens.some(
+        t => t.token === token
+    )
+}
+
+// Revoke all refresh token
+const revokeAllRefreshToken = async (userId) => {
+    await User.findByIdAndUpdate(userId, {
+        $set: {
+            refreshTokens: []
+        }
+    })
+}
+
+
 module.exports =  {
     createUser,
     loginUser,
-    getUserById
+    getUserById,
+    saveRefreshToken,
+    revokeRefreshToken,
+    isRefreshTokenValid,
+    revokeAllRefreshToken
 }

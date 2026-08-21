@@ -23,12 +23,12 @@ passport.use(
   new Strategy(options, async (jwtPayload, done) => {
     try {
       
-      const user = await userService.getUserById(jwtPayload.id); 
+      const user = await userService.userProfile(jwtPayload.id); 
 
       if (user) {
         
         // Token is valid; attach user object to req.user
-        console.log("User found:", user);
+        // console.log("User found:", user);
 
         return done(null, user);
       } else {

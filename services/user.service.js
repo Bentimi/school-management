@@ -65,6 +65,13 @@ const loginUser = async (data) => {
         throw new AppError("Invalid credentials", 401)
     }
 
+    const updateUserLogin = await User.findByIdAndUpdate(
+        user._id,
+        {
+            last_login: new Date()
+        }
+    )
+
     const userData = user.toObject();
     delete userData.password;
     delete userData.refreshTokens;
@@ -72,7 +79,7 @@ const loginUser = async (data) => {
     return userData;
 }
 
-const getUserById = async (id) => {
+const userProfile = async (id) => {
     const user = await User.findById(id).select('-password -refreshTokens');
 
     if (!user) {
@@ -127,7 +134,7 @@ const revokeAllRefreshToken = async (userId) => {
 module.exports =  {
     createUser,
     loginUser,
-    getUserById,
+    userProfile,
     saveRefreshToken,
     revokeRefreshToken,
     isRefreshTokenValid,

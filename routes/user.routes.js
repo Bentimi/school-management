@@ -7,10 +7,12 @@ const validatedData = require("../utils/userDataValidation.utils")
 const csrfProtection = require("../middleware/csrf.middleware");
 const passport = require("../config/passport.config");
 
+const isAuth = passport.authenticate('jwt', { session: false })
+
 router.post('/register', validatedData.validatedUserSchema, userController.create_User);
 router.post('/login', validatedData.validatedLoginSchema, userController.login_User);
-router.get('/user-profile', csrfProtection, passport.authenticate('jwt', { session: false }), userController.get_UserById);
-
-
+router.post('/refresh', userController.refresh_Token);
+router.get('/user-profile', csrfProtection, isAuth, userController.user_Profile);
+router.post('/logout', csrfProtection, isAuth, userController.logout_User);
 
 module.exports = router;

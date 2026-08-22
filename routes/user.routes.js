@@ -14,5 +14,6 @@ router.post('/login', validatedData.validatedLoginSchema, userController.login_U
 router.post('/refresh', userController.refresh_Token);
 router.get('/user-profile', csrfProtection, isAuth, userController.user_Profile);
 router.post('/logout', csrfProtection, isAuth, userController.logout_User);
+router.post('/change-password', csrfProtection, isAuth, validatedData.validatedChangePasswordSchema,userController.change_Password);
 
 module.exports = router;

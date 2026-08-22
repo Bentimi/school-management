@@ -215,10 +215,26 @@ const logout_User = async (req, res, next) => {
     }
 }
 
+const change_Password = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+        const refreshToken = req.cookies.refreshToken
+        const data = req.body
+        const result = await userService.changePassword(userId, data)
+        if (refreshToken) {
+            await userService.revokeOtherRefreshToken(userId, refreshToken)
+        } 
+        res.success(result, "Password Changed")
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     create_User,
     login_User,
     user_Profile,
     refresh_Token,
-    logout_User
+    logout_User,
+    change_Password
 }

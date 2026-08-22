@@ -20,8 +20,28 @@ const loginSchema = joi.object({
     password: joi.string().trim().required()
 })
 
+const changePasswordSchema = joi.object({
+    password: joi.string().trim()
+    .min(8)
+    .max(30)
+    .required()
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])'))
+    .messages({
+      'string.pattern.base': 'Password must include uppercase, lowercase, number, and a special character (!@#$%^&*)',
+    }),
+    newPassword: joi.string().trim()
+    .min(8)
+    .max(30)
+    .required()
+    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])'))
+    .messages({
+      'string.pattern.base': 'Password must include uppercase, lowercase, number, and a special character (!@#$%^&*)',
+    })
+})
+
 
 module.exports = {
     validatedUserSchema : validate(userSchema),
-    validatedLoginSchema : validate(loginSchema)
+    validatedLoginSchema : validate(loginSchema),
+    validatedChangePasswordSchema : validate(changePasswordSchema)
 }

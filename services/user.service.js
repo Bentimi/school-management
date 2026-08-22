@@ -129,6 +129,15 @@ const revokeAllRefreshToken = async (userId) => {
     await RefreshToken.deleteMany({ user: userId })
 }
 
+// Revoke other refresh token
+const revokeOtherRefreshToken = async (userId, token) => {
+    const hashed = hashedToken(token);
+    await RefreshToken.deleteMany({ 
+        user: userId,
+        token: { $ne: hashed }
+     })
+}
+
 // Blacklist an access token
 const blacklistToken = async (jti, exp) => {
     const expiresAt = new Date(exp * 1000);
@@ -145,6 +154,56 @@ const isTokenBlacklisted = async (jti) => {
     return token;
 };
 
+const changePassword = async (userId, data) => {
+
+    if (!userId) {
+        throw AppError("Unauthorized User", 401)
+    }
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+        throw AppError("User not found", 404)
+    }
+
+    if (!data.password || !data.newPassword) {
+        throw AppError("All fields required", 400)
+    }
+
+    // Compare old and new passwords
+    const comaparePassword = await bcrypt.compare(data.password, user.password)
+
+    if (!comaparePassword) {
+        throw new AppError("Old password do not match", 400)
+    }
+
+    const isMatch = await bcrypt.compare(data.newPassword, user.password)
+
+    if (!isMatch) {
+        throw new AppError("New and old passwords cannot be the same", 400)
+    }
+
+    // New hashed password
+    const hashedPwd = await bcrypt.hash(data.newPassword, 10)
+
+    // Update password
+    const updatedPassword =  await User.findByIdAndUpdate(
+        user._id,
+        {
+            password: hashedPwd
+        }
+    )
+
+    await updatedPassword.save();
+
+    const result = updatedPassword.toObject();
+    delete result.password;
+
+    return {
+        user: result
+    }
+}
+
 module.exports =  {
     createUser,
     loginUser,
@@ -153,6 +212,8 @@ module.exports =  {
     revokeRefreshToken,
     isRefreshTokenValid,
     revokeAllRefreshToken,
+    revokeOtherRefreshToken,
     blacklistToken,
-    isTokenBlacklisted
+    isTokenBlacklisted,
+    changePassword
 }

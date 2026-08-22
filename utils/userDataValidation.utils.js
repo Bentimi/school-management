@@ -39,9 +39,14 @@ const changePasswordSchema = joi.object({
     })
 })
 
+const forgetPasswordSchema = joi.object({
+   email : joi.string().email().trim().required(),
+})
+
 
 module.exports = {
     validatedUserSchema : validate(userSchema),
     validatedLoginSchema : validate(loginSchema),
-    validatedChangePasswordSchema : validate(changePasswordSchema)
+    validatedChangePasswordSchema : validate(changePasswordSchema),
+    validatedForgetPasswordSchema : validate(forgetPasswordSchema)
 }

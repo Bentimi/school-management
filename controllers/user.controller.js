@@ -219,12 +219,24 @@ const change_Password = async (req, res, next) => {
     try {
         const userId = req.user.id
         const refreshToken = req.cookies.refreshToken
-        const data = req.body
+        const data = req.body;
+
         const result = await userService.changePassword(userId, data)
         if (refreshToken) {
             await userService.revokeOtherRefreshToken(userId, refreshToken)
         } 
         res.success(result, "Password Changed")
+    } catch (e) {
+        next(e);
+    }
+}
+
+const forget_Password = async (req, res, next) => {
+    try {
+        const data = req.body;
+
+        const user = await userService.forgetPassword(data);
+        res.success(user, "reset password link has been sent the provided email ")
     } catch (e) {
         next(e);
     }
@@ -236,5 +248,6 @@ module.exports = {
     user_Profile,
     refresh_Token,
     logout_User,
-    change_Password
+    change_Password,
+    forget_Password
 }

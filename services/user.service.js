@@ -10,7 +10,7 @@ const hashedToken = require("../utils/hash.utils");
 
 dotenv.config();
 
-
+// Create or Register user
 const createUser = async (data) => {
     if (!data.first_name || !data.last_name) {
         throw new AppError("All fields required", 400)
@@ -43,6 +43,7 @@ const createUser = async (data) => {
 }
 
 
+// Login user
 const loginUser = async (data) => {
 
     const { credentials, password } = data;
@@ -82,6 +83,7 @@ const loginUser = async (data) => {
     return userData;
 }
 
+// User profile
 const userProfile = async (id) => {
     const user = await User.findById(id).select('-password -refreshTokens');
 
@@ -154,6 +156,7 @@ const isTokenBlacklisted = async (jti) => {
     return token;
 };
 
+// Change Passowrd
 const changePassword = async (userId, data) => {
 
     if (!userId) {
@@ -204,6 +207,40 @@ const changePassword = async (userId, data) => {
     }
 }
 
+// Forget password
+const forgetPassword = async (data) => {
+    if (!data.email) {
+        throw new AppError("Email is required", 400);
+    }
+
+    const existingUser = await User.findOne({
+        email: data.email
+    }).select('-password')
+    if(!existingUser) {
+        throw new AppError("Invalid email", 400)
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedResetToken = hashedToken(resetToken);
+
+    // console.log(`
+    //     resetToken ${resetToken}
+    //     hashedToken ${hashedResetToken}
+    //     `)
+
+    existingUser.resetToken = hashedResetToken;
+    existingUser.resetExpires = new Date(Date.now() + 30 * 60 * 1000);
+
+    await existingUser.save();
+
+     const resetUrl = `${process.env.FRONTEND_URL}/account/reset-password?token=${resetToken}`;
+
+    return {
+        user: existingUser,
+        link: resetUrl
+    }
+}
+
 module.exports =  {
     createUser,
     loginUser,
@@ -215,5 +252,6 @@ module.exports =  {
     revokeOtherRefreshToken,
     blacklistToken,
     isTokenBlacklisted,
-    changePassword
+    changePassword,
+    forgetPassword
 }

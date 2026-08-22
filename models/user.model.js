@@ -37,6 +37,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    image: {
+        type: String,
+        defalut: null,
+        required: false
+    },
     resetToken: {
         type: String,
         default: null,

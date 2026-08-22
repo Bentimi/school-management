@@ -38,8 +38,9 @@ const questionSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['mcq'],
-        default: null,
+        enum: ['mcqs', 't/f', 'completion', 'computational'],
+        required: true
+        // default: null,
     },
     grade: {
         type: mongoose.Schema.Types.Decimal128,
@@ -49,8 +50,12 @@ const questionSchema = new mongoose.Schema({
     published: {
         type: Boolean,
         default: true
-    }
-
+    },
+    image: {
+        type: String,
+        defalut: null,
+        required: false
+    },
 }, {
     timestamps: true,
     versionKey: false

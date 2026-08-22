@@ -1,4 +1,4 @@
-const userService = require("../services/user.service")
+const userService = require("../services/user.service");
 const jwt = require('jsonwebtoken');
 const { generateCsrfToken } = require("../utils/random.utils");
 const { v4: uuidv4 } = require("uuid");
@@ -182,12 +182,12 @@ const logout_User = async (req, res, next) => {
                 accessToken, process.env.JWT_SECRET
                 )
 
-                console.log('Decoded', decoded)
+                // console.log('Decoded', decoded)
                 if (decoded.jti) {
                     await userService.blacklistToken(decoded.jti, decoded.exp)
                 }
             } catch (e) {
-                console.log(e)
+                // console.log(e)
             }
         }
 

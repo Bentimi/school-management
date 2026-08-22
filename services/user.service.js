@@ -1,9 +1,11 @@
 const User = require("../models/user.model");
-const BlacklistedToken = require("../models/blacklist.model")
+const BlacklistedToken = require("../models/blacklist.model");
+const RefreshToken = require("../models/refreshToken.model");
 const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const crypto = require("crypto");
 const AppError = require("../utils/AppError.utils");
+const hashedToken = require("../utils/hash.utils");
 
 
 dotenv.config();
@@ -92,43 +94,39 @@ const userProfile = async (id) => {
 
 // Save a new refresh token
 const saveRefreshToken = async (userId, token) => {
-    await User.findByIdAndUpdate(userId, {
-        $push: {
-            refreshTokens: {
-                token, createdAt: new Date()
-            }
-        }
-    })
+    const hashed = hashedToken(token)
+    const newToken = new RefreshToken({
+        user: userId,
+        token: hashed
+    });
+    console.log(newToken)
+    await newToken.save();
+    return newToken;
 }
 
 // Revoke specific refresh token
 const revokeRefreshToken = async (userId, token) => {
-    await User.findByIdAndUpdate(userId, {
-        $pull: {
-            refreshTokens: {
-                token
-            }
-        }
+    const hashed = hashedToken(token);
+    const result = await RefreshToken.deleteOne({
+        user: userId,
+        token: hashed
     })
+    return result.deletedCount > 0;
 }
 
 // Check for refresh token validity 
 const isRefreshTokenValid = async (userId, token) => {
-    const user = await User.findById(userId).select("refreshTokens");
-
-    if (!user) return false;
-    return user.refreshTokens.some(
-        t => t.token === token
-    )
+    const hashed = hashedToken(token);
+    const result = await RefreshToken.findOne({
+        user: userId,
+        token: hashed
+    })
+    return result;
 }
 
 // Revoke all refresh token
 const revokeAllRefreshToken = async (userId) => {
-    await User.findByIdAndUpdate(userId, {
-        $set: {
-            refreshTokens: []
-        }
-    })
+    await RefreshToken.deleteMany({ user: userId })
 }
 
 // Blacklist an access token

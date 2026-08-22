@@ -15,6 +15,11 @@ const courseFormSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    level: {
+        type: Number,
+        required: true,
+        default: null
     }
 }, {
     timestamps: true,

@@ -36,4 +36,4 @@ const cbtSchema = new mongoose.Schema({
     versionKey: false
 })
 
-module.exports = mongoose.model('cbt', cbtSchema);
+module.exports = mongoose.model('Cbt', cbtSchema);

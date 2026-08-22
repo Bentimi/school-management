@@ -54,7 +54,6 @@ const resetPasswordSchema = joi.object({
     })
 })
 
-
 module.exports = {
     validatedUserSchema : validate(userSchema),
     validatedLoginSchema : validate(loginSchema),

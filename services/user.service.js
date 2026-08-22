@@ -223,11 +223,6 @@ const forgetPassword = async (data) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedResetToken = hashedToken(resetToken);
 
-    // console.log(`
-    //     resetToken ${resetToken}
-    //     hashedToken ${hashedResetToken}
-    //     `)
-
     existingUser.resetToken = hashedResetToken;
     existingUser.resetExpires = new Date(Date.now() + 30 * 60 * 1000);
 
@@ -239,6 +234,40 @@ const forgetPassword = async (data) => {
         user: existingUser,
         link: resetUrl
     }
+}
+
+const resetPassword = async (token, data) => {
+    const hashToken = hashedToken(token);
+    
+    const existingToken = await User.findOne({ 
+        resetToken: hashToken,
+        resetExpires:{ $gt: Date.now() }
+    });
+
+    if (!exisitngToken) {
+        throw new AppError("Invalid or expired reset token", 400)
+    }
+
+    if (!data.newPassword) {
+        throw new AppError("All fields are required", 400);
+    }
+
+    const isMatch = await bcrypt.compare(data.newPassword, existingToken.password)
+
+    if (!isMatch) {
+        throw new AppError("New password cannot be the same as old", 400)
+    }
+
+    // New hashed password
+    const hashedPwd = await bcrypt.hash(data.newPassword, 10)
+
+    // Update password
+    const updatedPassword =  await User.findByIdAndUpdate(
+        existingToken._id,
+        {
+            password: hashedPwd
+        }
+    )
 }
 
 module.exports =  {
@@ -253,5 +282,6 @@ module.exports =  {
     blacklistToken,
     isTokenBlacklisted,
     changePassword,
-    forgetPassword
+    forgetPassword,
+    resetPassword
 }

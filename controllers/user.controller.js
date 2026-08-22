@@ -236,9 +236,20 @@ const forget_Password = async (req, res, next) => {
         const data = req.body;
 
         const user = await userService.forgetPassword(data);
-        res.success(user, "reset password link has been sent the provided email ")
+        res.success(null, "reset password link has been sent the provided email ")
     } catch (e) {
         next(e);
+    }
+}
+
+const reset_Password = async (req, res, next) => {
+    try {
+        const token = req.query.token;
+        const data = req.body;
+        const user = await userService.resetPassword(token, data);
+
+    } catch (e) {
+        next (e);
     }
 }
 
@@ -249,5 +260,6 @@ module.exports = {
     refresh_Token,
     logout_User,
     change_Password,
-    forget_Password
+    forget_Password,
+    reset_Password
 }

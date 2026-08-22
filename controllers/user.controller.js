@@ -35,12 +35,13 @@ const login_User = async (req, res, next) => {
 
          const payload = { 
             id: user._id,
+            jti: uuidv4()
         };
 
         const accessToken = jwt.sign(
             payload, 
             process.env.JWT_SECRET, 
-            { expiresIn: '15m' }
+            { expiresIn: '1hr' }
         );
 
         const newRefreshToken = jwt.sign(
@@ -49,6 +50,7 @@ const login_User = async (req, res, next) => {
             { expiresIn: '7d' }
         );
 
+        console.log("Encoded", payload)
         await userService.saveRefreshToken(user._id, newRefreshToken)
        
         res.cookie('refreshToken', 
@@ -66,7 +68,7 @@ const login_User = async (req, res, next) => {
 
         res.cookie('accessToken', 
             accessToken,
-            cookieOptions(15 * 60 * 1000)
+            cookieOptions(60 * 60 * 1000)
         );
        
         res.success({ user }, "Login successful")
@@ -129,7 +131,7 @@ const refresh_Token = async (req, res, next) => {
         const newAccessToken = jwt.sign(
             { id: payload.id, jti: uuidv4() },
             process.env.JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '1hr' }
         );
 
         const newRefreshToken = jwt.sign(
@@ -145,7 +147,7 @@ const refresh_Token = async (req, res, next) => {
 
         res.cookie('accessToken', 
             newAccessToken,
-            cookieOptions(15 * 60 * 1000)    
+            cookieOptions(60 * 60 * 1000)    
         );
        
         res.cookie('refreshToken', 
@@ -173,6 +175,21 @@ const logout_User = async (req, res, next) => {
         const userId = req.user.id;
         const accessToken = req.cookies.accessToken;
         const refreshToken = req.cookies.refreshToken;
+
+        if (accessToken) {
+            try {
+                const decoded = jwt.verify(
+                accessToken, process.env.JWT_SECRET
+                )
+
+                console.log('Decoded', decoded)
+                if (decoded.jti) {
+                    await userService.blacklistToken(decoded.jti, decoded.exp)
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
 
         if (refreshToken) {
             await userService.revokeRefreshToken(userId, refreshToken);

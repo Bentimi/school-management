@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const BlacklistedToken = require("../models/blacklist.model")
 const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const crypto = require("crypto");
@@ -130,6 +131,21 @@ const revokeAllRefreshToken = async (userId) => {
     })
 }
 
+// Blacklist an access token
+const blacklistToken = async (jti, exp) => {
+    const expiresAt = new Date(exp * 1000);
+
+    await BlacklistedToken.create({
+        jti,
+        expiresAt
+    });
+};
+
+// check if an access token is blacklisted
+const isTokenBlacklisted = async (jti) => {
+    const token = await BlacklistedToken.findOne({ jti });
+    return token;
+};
 
 module.exports =  {
     createUser,
@@ -138,5 +154,7 @@ module.exports =  {
     saveRefreshToken,
     revokeRefreshToken,
     isRefreshTokenValid,
-    revokeAllRefreshToken
+    revokeAllRefreshToken,
+    blacklistToken,
+    isTokenBlacklisted
 }

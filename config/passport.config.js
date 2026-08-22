@@ -22,13 +22,18 @@ const options = {
 passport.use(
   new Strategy(options, async (jwtPayload, done) => {
     try {
+
+      if (jwtPayload.jti) {
+        const isBlacklisted = await userService.isTokenBlacklisted(jwtPayload.jti);
+
+        if (isBlacklisted) {
+          return done(null, false)
+        }
+      }
       
       const user = await userService.userProfile(jwtPayload.id); 
 
       if (user) {
-        
-        // Token is valid; attach user object to req.user
-        // console.log("User found:", user);
 
         return done(null, user);
       } else {

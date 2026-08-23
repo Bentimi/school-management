@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("../controllers/user.controller");
-const validatedData = require("../utils/userDataValidation.utils")
+const validatedData = require("../validations/user.validation")
 
 const csrfProtection = require("../middleware/csrf.middleware");
 const passport = require("../config/passport.config");

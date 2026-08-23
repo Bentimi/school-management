@@ -4,7 +4,8 @@ const sectionSchema = new mongoose.Schema({
     section: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     isActive: {
         type: Boolean,
@@ -12,11 +13,13 @@ const sectionSchema = new mongoose.Schema({
     },
     startDate: {
         type: Date,
-        required: true
+        required: true,
+        trim: true
     },
     endDate: {
         type: Date,
-        required: true
+        required: true,
+        trim: true
     },
     regStatus: {
         type: Boolean,
@@ -25,6 +28,16 @@ const sectionSchema = new mongoose.Schema({
     paymentStatus: {
         type: Boolean,
         default: false
+    },
+    lastUpdatedBy: {
+        type: mongoose.Schema.Tpes.ObjectId,
+        ref: 'User',
+        default: null
+    },
+    createdBy: {
+        type: mongoose.Schema.Tpes.ObjectId,
+        ref: 'User',
+        default: null
     }
 }, {
     timestamps: true,

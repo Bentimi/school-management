@@ -4,22 +4,26 @@ const courseFormSchema = new mongoose.Schema({
     section: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Section',
-        required: true
+        required: true,
+        trim: true
     },
     course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
-        required: true
+        required: true,
+        trim: true
     },
     student: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        trim: true
     },
     level: {
         type: Number,
         required: true,
-        default: null
+        default: null,
+        trim: true
     }
 }, {
     timestamps: true,

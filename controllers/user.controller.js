@@ -20,7 +20,11 @@ const create_User = async (req, res, next) => {
 
         const data = req.body;
         const user = await userService.createUser(req.body);
-        res.status(201).json({ status: 'success', user})
+        res.status(201).json({ 
+            status: 'success', 
+            message: 'User registered successfully',
+            user
+        })
 
     } catch (e) {
         next(e);

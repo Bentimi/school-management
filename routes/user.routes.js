@@ -9,6 +9,7 @@ const passport = require("../config/passport.config");
 
 const isAuth = passport.authenticate('jwt', { session: false })
 
+// Routes
 router.post('/register', validatedData.validatedUserSchema, userController.create_User);
 router.post('/login', validatedData.validatedLoginSchema, userController.login_User);
 router.post('/refresh', userController.refresh_Token);

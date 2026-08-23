@@ -30,12 +30,12 @@ const sectionSchema = new mongoose.Schema({
         default: false
     },
     lastUpdatedBy: {
-        type: mongoose.Schema.Tpes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null
     },
     createdBy: {
-        type: mongoose.Schema.Tpes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null
     }

@@ -8,6 +8,9 @@ const swaggerJSDoc = require("swagger-jsdoc");
 const { responseHandler } = require("./middleware/responseHandler.middleware");
 const { errorHandler } = require("./middleware/errorHandler.middleware");
 const UserRoutes = require("./routes/user.routes");
+const SectionRoutes = require("./routes/section.routes");
+
+
 const passport = require("passport");
 const cookieParser = require("cookie-parser") 
 
@@ -62,7 +65,8 @@ const swaggerOptions = {
 
    app.use(responseHandler)
    
-   app.use("/account", UserRoutes)
+   app.use("/account", UserRoutes);
+   app.use("/section", SectionRoutes);
 
    app.use(errorHandler)
 

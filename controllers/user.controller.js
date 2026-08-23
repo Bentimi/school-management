@@ -240,7 +240,7 @@ const forget_Password = async (req, res, next) => {
         const data = req.body;
 
         const user = await userService.forgetPassword(data);
-        res.success(null, "reset password link has been sent the provided email ")
+        res.success(null, "reset password link has been sent the provided email")
     } catch (e) {
         next(e);
     }
@@ -251,7 +251,7 @@ const reset_Password = async (req, res, next) => {
         const token = req.query.token;
         const data = req.body;
         const user = await userService.resetPassword(token, data);
-
+        res.success(user, "password reset done")
     } catch (e) {
         next (e);
     }

@@ -38,6 +38,8 @@ const createUser = async (data) => {
 
     const user = newUser.toObject();
     delete user.password;
+    delete user.resetToken;
+    delete user.resetExpires;
 
     return user;
 }
@@ -60,13 +62,13 @@ const loginUser = async (data) => {
     })
 
     if (!user) {
-        throw new AppError("Invalid credentials", 401)
+        throw new AppError("Invalid credentials", 404)
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-        throw new AppError("Invalid credentials", 401)
+        throw new AppError("Invalid credentials", 404)
     }
 
     const updateUserLogin = await User.findByIdAndUpdate(
@@ -84,8 +86,8 @@ const loginUser = async (data) => {
 }
 
 // User profile
-const userProfile = async (id) => {
-    const user = await User.findById(id).select('-password -refreshTokens');
+const userProfile = async (userId) => {
+    const user = await User.findById(userId).select('-password -refreshTokens');
 
     if (!user) {
         throw new AppError("User not found", 404);
@@ -201,6 +203,8 @@ const changePassword = async (userId, data) => {
 
     const result = updatedPassword.toObject();
     delete result.password;
+    delete result.refreshTokens;
+    delete result.resetExpires;
 
     return {
         user: result
@@ -217,7 +221,7 @@ const forgetPassword = async (data) => {
         email: data.email
     }).select('-password')
     if(!existingUser) {
-        throw new AppError("Invalid email", 400)
+        throw new AppError("Invalid email", 404)
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -227,11 +231,15 @@ const forgetPassword = async (data) => {
     existingUser.resetExpires = new Date(Date.now() + 30 * 60 * 1000);
 
     await existingUser.save();
+    const result = existingUser.toObject();
+    delete result.password;
+    delete result.refreshTokens;
+    delete result.resetExpires;
 
      const resetUrl = `${process.env.FRONTEND_URL}/account/reset-password?token=${resetToken}`;
 
     return {
-        user: existingUser,
+        user: result,
         link: resetUrl
     }
 }
@@ -265,10 +273,26 @@ const resetPassword = async (token, data) => {
     const updatedPassword =  await User.findByIdAndUpdate(
         existingToken._id,
         {
-            password: hashedPwd
+            password: hashedPwd,
+            resetToken: null,
+            resetExpires: null
+        },
+        {
+            new: true,
+            runValidators: true
         }
     )
+
+    const user = updatedPassword.toObject();
+    delete user.password;
+    delete user.refreshTokens;
+    delete user.resetExpires;
+
+    return user
 }
+
+// Soft user delete
+// const userDel
 
 module.exports =  {
     createUser,

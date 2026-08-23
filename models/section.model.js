@@ -13,13 +13,11 @@ const sectionSchema = new mongoose.Schema({
     },
     startDate: {
         type: Date,
-        required: true,
-        trim: true
+        required: true
     },
     endDate: {
         type: Date,
-        required: true,
-        trim: true
+        required: true
     },
     regStatus: {
         type: Boolean,

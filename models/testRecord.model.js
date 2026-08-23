@@ -25,8 +25,9 @@ const testrecordSchema = new mongoose.Schema({
         enum: ['test', 'exam'],
         required: true
     },
-    session: {
-        type: String,
+    section: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Section',
         required: true
     }
 }, {

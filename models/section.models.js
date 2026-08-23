@@ -1,7 +1,7 @@
 const mongoose =  require("mongoose");
 
-const sessionSchema = new mongoose.Schema({
-    session: {
+const sectionSchema = new mongoose.Schema({
+    section: {
         type: String,
         required: true,
         unique: true
@@ -17,10 +17,18 @@ const sessionSchema = new mongoose.Schema({
     endDate: {
         type: Date,
         required: true
+    },
+    regStatus: {
+        type: Boolean,
+        default: false 
+    },
+    paymentStatus: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true,
     versionKey: false
 });
 
-module.exports = mongoose.model('Session', sessionSchema);
+module.exports = mongoose.model('Section', sectionSchema);

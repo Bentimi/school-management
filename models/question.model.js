@@ -11,26 +11,31 @@ const questionSchema = new mongoose.Schema({
         ref: 'Course',
         required: true
     },
-    option1: {
+    options: [{
         type: String,
         default: null,
         required: false
-    },
-    option2: {
-        type: String,
-        default: null,
-        required: false
-    },
-    option3: {
-        type: String,
-        default: null,
-        required: false
-    },
-    option4: {
-        type: String,
-        default: null,
-        required: false
-    },
+    }],
+    // option1: {
+    //     type: String,
+    //     default: null,
+    //     required: false
+    // },
+    // option2: {
+    //     type: String,
+    //     default: null,
+    //     required: false
+    // },
+    // option3: {
+    //     type: String,
+    //     default: null,
+    //     required: false
+    // },
+    // option4: {
+    //     type: String,
+    //     default: null,
+    //     required: false
+    // },
     answer: {
         type: String,
         default: null,

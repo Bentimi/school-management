@@ -276,5 +276,6 @@ module.exports = {
     logout_User,
     change_Password,
     forget_Password,
-    reset_Password
+    reset_Password,
+    user_Delete
 }

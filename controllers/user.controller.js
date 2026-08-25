@@ -257,6 +257,17 @@ const reset_Password = async (req, res, next) => {
     }
 }
 
+const user_Delete = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const targetId = req.params.id;
+        const user = await userService.userDelete(userId, targetId);
+        res.success(user, "User deleted successfully")
+    } catch (e) {
+        next (e);
+    }
+}
+
 module.exports = {
     create_User,
     login_User,

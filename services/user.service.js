@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const crypto = require("crypto");
 const AppError = require("../utils/AppError.utils");
 const hashedToken = require("../utils/hash.utils");
+const mongoose = require("mongoose");
 
 
 dotenv.config();
@@ -292,7 +293,37 @@ const resetPassword = async (token, data) => {
 }
 
 // Soft user delete
-// const userDel
+const userDelete = async (userId, targetId) => {
+    if (!userId) {
+        throw new AppError("Unauthorized user", 401);
+    }
+
+    
+    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+        throw new AppError("Invalid taget Id", 400);
+    }
+    
+    const user = await User.findById(targetId).select('-password -resetToken -resetExpires');
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
+
+    let status;
+    if (!user.active) {
+        status = true;
+    } else {
+        if ((user.role !== "admin") || (String(userId) !== String(targetId))) {
+            throw new AppError("Forbidden access", 403);
+        }
+
+        status = false;
+    }
+
+    user.active = status;
+    await user.save()
+    return user;
+
+} 
 
 module.exports =  {
     createUser,
@@ -307,5 +338,6 @@ module.exports =  {
     isTokenBlacklisted,
     changePassword,
     forgetPassword,
-    resetPassword
+    resetPassword,
+    userDelete
 }

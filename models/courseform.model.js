@@ -1,9 +1,9 @@
 const mongoose =  require("mongoose");
 
 const courseFormSchema = new mongoose.Schema({
-    section: {
+    session: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Section',
+        ref: 'Session',
         required: true,
         trim: true
     },

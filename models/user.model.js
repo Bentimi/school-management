@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'student', 'principal', 'staff', 'admin'],
+        enum: ['user', 'student', 'principal', 'staff', 'admin', 'aspirant'],
         default: 'user'
     },
     department: {
@@ -49,6 +49,34 @@ const userSchema = new mongoose.Schema({
     resetExpires: {
         type: Date,
         default: null,
+    },
+    address: {
+        type: String,
+        default: null
+    },
+    phone_number: {
+        type: String,
+        default: null
+    },
+    state_Of_Origin: {
+        type: String,
+        required: true
+    },
+    Country: {
+        type: String,
+        required: true
+    },
+    next_Of_Kin: {
+        type: String,
+        required: true
+    },
+    next_Of_Kin_Number: {
+        type: String,
+        required: true
+    },
+    next_Of_Kin_Relationship: {
+        type: String,
+        required: true
     },
     password: {
         type: String,

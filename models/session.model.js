@@ -1,7 +1,7 @@
 const mongoose =  require("mongoose");
 
-const sectionSchema = new mongoose.Schema({
-    section: {
+const sessionSchema = new mongoose.Schema({
+    session: {
         type: String,
         required: true,
         unique: true,
@@ -42,4 +42,4 @@ const sectionSchema = new mongoose.Schema({
     versionKey: false
 });
 
-module.exports = mongoose.model('Section', sectionSchema);
+module.exports = mongoose.model('Session', sessionSchema);

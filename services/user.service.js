@@ -104,7 +104,7 @@ const saveRefreshToken = async (userId, token) => {
         user: userId,
         token: hashed
     });
-    console.log(newToken)
+    // console.log(newToken)
     await newToken.save();
     return newToken;
 }

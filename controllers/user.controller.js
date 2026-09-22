@@ -4,12 +4,14 @@ const { generateCsrfToken } = require("../utils/random.utils");
 const { v4: uuidv4 } = require("uuid");
 
 const isProduction = process.env.NODE_ENV === 'production'
+const isSameSite = process.env.SAMESITE
 
 const cookieOptions = (maxAge) => ({
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'none' : 'strict',
-    maxAge
+    sameSite: isSameSite,
+    maxAge,
+    path: '/'
 });
 
 const csrfToken = generateCsrfToken()
@@ -54,7 +56,7 @@ const login_User = async (req, res, next) => {
             { expiresIn: '7d' }
         );
 
-        console.log("Encoded", payload)
+        // console.log("Encoded", payload)
         await userService.saveRefreshToken(user._id, newRefreshToken)
        
         res.cookie('refreshToken', 
@@ -66,8 +68,9 @@ const login_User = async (req, res, next) => {
             csrfToken, {
             httpOnly: false,
             secure: isProduction,
-            sameSite: isProduction ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 
+            sameSite: isSameSite,
+            maxAge: 7 * 24 * 60 * 60 * 1000 ,
+            path: '/'
         });
 
         res.cookie('accessToken', 
@@ -163,8 +166,9 @@ const refresh_Token = async (req, res, next) => {
             csrfToken, {
             httpOnly: false,
             secure: isProduction,
-            sameSite: isProduction ? 'none' : 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000 
+            sameSite: isSameSite,
+            maxAge: 7 * 24 * 60 * 60 * 1000 ,
+            path: '/'
         });
 
         res.success(null, 'Tokens rotated successfully');

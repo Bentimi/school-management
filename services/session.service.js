@@ -1,27 +1,27 @@
 const User = require("../models/user.model");
-const Section = require("../models/section.model");
+const Session = require("../models/session.model");
 const AppError = require("../utils/AppError.utils");
 const mongoose = require("mongoose");
 
-const createSection = async (userId, data) => {
+const createSession = async (userId, data) => {
     if (!userId) {
         throw new AppError("Unauthorizd user", 401);
     }
 
-    if (!data.section || !data.endDate || !data.startDate) {
+    if (!data.session || !data.endDate || !data.startDate) {
         throw new AppError("All fields required", 400);
     }
 
-    const existingSection = await Section.findOne({
-        section: data.section
+    const existingSession = await Session.findOne({
+        session: data.session
     })
 
-    if (existingSection) {
-        throw new AppError("Section already exists", 409)
+    if (existingSession) {
+        throw new AppError("Session already exists", 409)
     }
 
-    const newSection =  new Section({
-        section: data.section,
+    const newSession =  new Session({
+        session: data.session,
         startDate: data.startDate,
         endDate: data.endDate,
         regStatus: data.regStatus || false,
@@ -30,15 +30,15 @@ const createSection = async (userId, data) => {
         createdBy: userId
     })
 
-    await newSection.save();
-    await newSection.populate('createdBy', 'first_name last_name email');
+    await newSession.save();
+    await newSession.populate('createdBy', 'first_name last_name email');
 
     return {
-        section: newSection
+        session: newSession
     }
 }
 
-const updateSection = async (userId, sectionId, data) => {
+const updateSession = async (userId, sessionId, data) => {
     if (!userId) {
         throw new AppError("Unauthorized user", 401);
     }
@@ -52,19 +52,19 @@ const updateSection = async (userId, sectionId, data) => {
         throw new AppError("Forbidden Access", 403)
     }
 
-    if (!data.section || !data.startDate || !data.endDate) {
+    if (!data.session || !data.startDate || !data.endDate) {
         throw new AppError("All fields required", 400);
     }
 
-    const section = await Section.findById(sectionId);
-    if (!section) {
+    const session = await Session.findById(sessionId);
+    if (!session) {
         throw new AppError("Data not found", 404);
     }
 
-    const updatedData = await Section.findByIdAndUpdate(
-        sectionId,
+    const updatedData = await Session.findByIdAndUpdate(
+        sessionId,
         {
-            section: data.section,
+            session: data.session,
             endDate: data.endDate,
             startDate: data.startDate,
             lastUpdatedBy: userId
@@ -78,15 +78,15 @@ const updateSection = async (userId, sectionId, data) => {
     .populate('createdBy', 'first_name last_name email')
     
     if (!updatedData) {
-        throw new AppError("Section not found", 404)
+        throw new AppError("Session not found", 404)
     }
 
     return {
-        section: updatedData
+        session: updatedData
     }
 }
 
-const getSection = async (userId, sectionId) => {
+const getSession = async (userId, sessionId) => {
     if (!userId) {
         throw new AppError("Unauthenticated user", 401)
     }
@@ -96,22 +96,22 @@ const getSection = async (userId, sectionId) => {
         throw new AppError("Forbidden Access", 403)
     }
 
-    if (!mongoose.Types.ObjectId.isValid(sectionId)) {
-        throw new AppError('Invalid section Id', 400)
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+        throw new AppError('Invalid session Id', 400)
     }
 
-    const section = await Section.findById(userId)
+    const session = await Session.findById(userId)
     .populate('lastUpdatedBy', 'first_name last_name email')
     .populate('createdBy', 'first_name last_name email')
 
-    if (!section) {
+    if (!session) {
         throw new AppError("Data not found", 404)
     }
 
-    return section;
+    return session;
 }
 
-const deleteSection = async (userId, sectionId) => {
+const deleteSession = async (userId, sessionId) => {
     if (!userId) {
         throw new AppError("Unauthorized User", 401);
     }
@@ -125,18 +125,18 @@ const deleteSection = async (userId, sectionId) => {
         throw new AppError("Forbidden access", 403);
     }
 
-    if (!mongoose.Types.ObjectId.isValid(sectionId)) {
-        throw new AppError('Invalid section Id', 400)
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+        throw new AppError('Invalid session Id', 400)
     }
 
-    const deletedSection = await Section.findOneAndDelete(sectionId);
-    if (!deletedSection) {
+    const deletedSession = await Session.findOneAndDelete(sessionId);
+    if (!deletedSession) {
         throw new AppError("Data not found", 404)
     }
-    return deletedSection;
+    return deletedSession;
 }
 
-const allSection = async (userId, pageSize, page) => {
+const allSession = async (userId, pageSize, page) => {
     if (!userId) {
         throw new AppError("Unauthorized User", 401);
     }
@@ -154,7 +154,7 @@ const allSection = async (userId, pageSize, page) => {
         pageSize = 100
     }
 
-    const sections = await Section.find()
+    const sessions = await Session.find()
     .populate("lastUpdatedBy", "first_name last_name email")
     .populate("createdBy", "first_name last_name email")
     .sort({ updatedAt: -1 })
@@ -162,13 +162,13 @@ const allSection = async (userId, pageSize, page) => {
     .limit(pageSize)
     .lean()
 
-    return sections;
+    return sessions;
 }
 
 module.exports = {
-    createSection,
-    updateSection,
-    getSection,
-    deleteSection,
-    allSection
+    createSession,
+    updateSession,
+    getSession,
+    deleteSession,
+    allSession
 }

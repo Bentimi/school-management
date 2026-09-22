@@ -20,9 +20,9 @@ const recordSchema = new mongoose.Schema({
         enum: ['passed', 'failed'],
         required: true
     },
-    section: {
+    session: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Section',
+        ref: 'Session',
         required: true
     }
 }, {

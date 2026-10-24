@@ -64,8 +64,17 @@ const editUserSchema = joi.object({
     country: joi.string()
     .valid('Nigeria', 'Ghana', 'Niger', 'Others').required(),
     address: joi.string().trim().max(250).optional()
+})
 
-    
+const addUserSchema = joi.object({
+    first_name: joi.string().trim().required(),
+    last_name : joi.string().trim().required(),
+    email : joi.string().email().trim().required(),
+    phone_number : joi.string().trim().required()
+})
+
+const userRole = joi.object({
+  role: joi.string().valid('user', 'student', 'principal', 'staff', 'admin', 'aspirant', 'lecturer').required()
 })
 
 module.exports = {
@@ -74,5 +83,7 @@ module.exports = {
     validatedChangePasswordSchema : validate(changePasswordSchema),
     validatedForgetPasswordSchema : validate(forgetPasswordSchema),
     validatedResetPasswordSchema : validate(resetPasswordSchema),
-    validatedEditUserSchema: validate(editUserSchema)
+    validatedEditUserSchema: validate(editUserSchema),
+    validatedAddUserSchema: validate(addUserSchema),
+    validatedUserRole: validate(userRole)
 }

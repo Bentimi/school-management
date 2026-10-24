@@ -270,8 +270,9 @@ const user_Delete = async (req, res, next) => {
         const userId = req.user.id;
         const targetId = req.params.id;
         const user = await userService.userDelete(userId, targetId);
-        res.success(user, "User deleted successfully")
+        res.success(user, user.msg)
     } catch (e) {
+        console.log(e)
         next (e);
     }
 }
@@ -280,12 +281,13 @@ const get_Users = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const page = parseInt(req.query.page) || 1;
-        const pageSize = parseInt(req.query.pageSize) || 10;
+        const pageSize = parseInt(req.query.pageSize) > 1 ? parseInt(req.query.pageSize) : 10;
         const search = req.query.search || ''
+        // console.log(`Req Query: ${req.query.search}`)
 
         const data = await userService.getUsers(userId, page, pageSize, search);
 
-        console.log(data)
+        // console.log(data)
         res.success(data, "Users successfully retrieved")
     } catch (e) {
         // console.log(e)
@@ -319,6 +321,39 @@ const users_Profile = async (req, res, next) => {
     }
 }
 
+const add_user = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const data = req.body;
+        const status = req.params.status;
+
+        const user = await userService.addUser(userId, data, status);
+        return res.status(201).json({
+            status: 'Success',
+            message: 'User successfully created!',
+            data: user
+        })
+    } catch (e) {
+        console.log(e)
+        next (e);
+    }
+}
+
+const role_allocation = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const data = req.body;
+        const targetId = req.params.id;
+
+        const user = await userService.roleAllocation(userId, data, targetId);
+        // console.log(user)
+        res.success(user, "User role updated!")
+    } catch (e) {
+        // console.log(e)
+        next (e)
+    }
+}
+
 module.exports = {
     create_User,
     login_User,
@@ -331,5 +366,7 @@ module.exports = {
     user_Delete,
     get_Users,
     edit_User,
-    users_Profile
+    users_Profile,
+    add_user,
+    role_allocation
 }

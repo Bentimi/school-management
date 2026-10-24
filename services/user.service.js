@@ -8,6 +8,7 @@ const AppError = require("../utils/AppError.utils");
 const hashedToken = require("../utils/hash.utils");
 const mongoose = require("mongoose");
 const { normalizePhoneNumber } = require("../utils/numberNormalization.utils");
+const passwordHash = require("../utils/hashedPassword");
 
 
 dotenv.config();
@@ -99,9 +100,9 @@ const userProfile = async (userId) => {
         throw new AppError("User not found", 404);
     }
 
-    if (!user.active) {
-        throw new AppError("Unauthorized", 401);
-    } 
+    // if (!user.active) {
+    //     throw new AppError("Unauthorized", 401);
+    // } 
     
     return user;
 }
@@ -319,20 +320,23 @@ const userDelete = async (userId, targetId) => {
         throw new AppError("User not found", 404);
     }
 
+    if ((userAuth.role !== "admin") && (userId !== targetId)) {
+        throw new AppError("Forbidden access", 403);
+    }
+
     let status;
+    let msg;
     if (!user.active) {
         status = true;
+        msg = 'Account successfully activated'
     } else {
-        if ((user.role !== "admin") || (String(userId) !== String(targetId))) {
-            throw new AppError("Forbidden access", 403);
-        }
-
         status = false;
+        msg = 'Account successfully deactivated'
     }
 
     user.active = status;
     await user.save()
-    return user;
+    return{ user, msg };
 
 } 
 
@@ -354,11 +358,6 @@ const getUsers = async (userId, page, pageSize, search) => {
     if (allowedRole.includes(user.role)) {
         throw new AppError('Forbidden Request', 403)
     }
-
-    //  if (pageSize > 100) {
-    //     pageSize = 100
-    // }
-    console.log('page' + page)
 
     let queryFilter = {};
 
@@ -449,7 +448,7 @@ const usersProfile = async (userId, targetId) => {
     }
 
      if (!userAuth.active) {
-        throw new AppError("Account not activated")
+        throw new AppError("Account not activated", 401)
     }
 
     const allowedRole = ['student', 'user', 'aspirant']
@@ -463,6 +462,113 @@ const usersProfile = async (userId, targetId) => {
     } 
     
     return user;
+}
+
+const addUser = async (userId, data, status) => {
+    const userAuth = await User.findById(userId);
+
+    if (!userAuth) {
+        throw new AppError("User do not exist", 400)
+    }
+
+    if (!userAuth.active) {
+        throw new AppError("Account not activated", 401 )
+    }
+
+    if (userAuth.role !== 'admin') {
+        throw new AppError("Forbidden Access", 403)
+    }
+
+    const existingEmail = await User.findOne({
+        email: data.email
+    });
+
+    if (existingEmail) {
+        throw new AppError('Email already exists', 409)
+    }
+
+    const phone_no =  normalizePhoneNumber(data.phone_number)
+    const existingPhoneNumber = await User.findOne({
+        phone_number: phone_no
+    });
+
+    if (existingPhoneNumber) {
+        throw new AppError('Phone number already exists', 409)
+    }
+
+    const firstName = data.first_name;
+    const pwd = `${firstName}12345`
+
+    const hashedPwd = await passwordHash(pwd)
+
+    let userStatus;
+    console.log(status)
+    if (status === 'staff' || status === 'student') {
+        userStatus = status
+    } else {
+        userStatus = 'user'
+    }
+
+    const newUser = new User({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        role: userStatus,
+        phone_number: phone_no,
+        password: hashedPwd
+    })
+
+    await newUser.save();
+
+    const user = newUser.toObject();
+    delete user.password;
+    delete user.resetToken;
+    delete user.resetExpires;
+
+    return user;
+
+}
+
+const roleAllocation = async (userId, data, targetId) => {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new AppError('Unauthorized User', 401)
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+        throw new AppError('Invalid user', 400)
+    }
+
+    const userAuth = await User.findById(userId)
+    if (!userAuth) {
+        throw new AppError("User not found", 404)
+    }
+
+    if (!userAuth.active) {
+        throw new AppError("Account not activated", 400)
+    }
+
+    if (!userAuth.role === 'admin') {
+        throw new AppError("Forbidden Access", 403)
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        targetId,
+        {
+            role: data.role
+        },
+        {
+            returnDocument: 'after'
+        }
+    )
+    .select('-password -resetToken -resetExpires')
+
+    if (!updatedUser) {
+        throw new AppError("Record not found", 404)
+    }
+
+    return {
+        user: updatedUser
+    }
 }
 
 module.exports =  {
@@ -482,5 +588,7 @@ module.exports =  {
     userDelete,
     getUsers,
     editUser,
-    usersProfile
+    usersProfile,
+    addUser,
+    roleAllocation
 }

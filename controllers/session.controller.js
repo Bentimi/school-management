@@ -69,7 +69,7 @@ const delete_Session = async (req, res, next) => {
 const all_Session = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const pageSize = parseInt(req.query.pageSize) || 10;
+        const pageSize = parseInt(req.query.pageSize) > 1 ? parseInt(req.query.pageSize) : 10;
         const page = parseInt(req.query.page) || 1;
         const search = req.query.search || '';
 

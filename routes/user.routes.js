@@ -22,5 +22,7 @@ router.delete('/delete/:id', csrfProtection, isAuth, userController.user_Delete)
 router.get('/users', csrfProtection, isAuth, userController.get_Users);
 router.patch('/:id', csrfProtection, isAuth, validatedData.validatedEditUserSchema, userController.edit_User);
 router.get('/profile/:id', csrfProtection, isAuth, userController.users_Profile);
+router.post('/add-user/:status', csrfProtection, isAuth, validatedData.validatedAddUserSchema, userController.add_user),
+router.put('/role/:id', csrfProtection, isAuth, validatedData.validatedUserRole, userController.role_allocation)
 
 module.exports = router;

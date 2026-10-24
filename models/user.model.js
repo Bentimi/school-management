@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    dob: {
+        type: Date,
+        required: false
+    },
     gender: {
         type: String,
         enum: ['male', 'female', 'other'],
@@ -56,27 +60,35 @@ const userSchema = new mongoose.Schema({
     },
     phone_number: {
         type: String,
-        default: null
+        default: null,
+        unique: true
     },
     state_Of_Origin: {
         type: String,
-        required: true
+        default: null,
+        required: false
     },
-    Country: {
+    country: {
         type: String,
-        required: true
+        enum: ['Nigeria', 'Ghana', 'Niger', 'Others'],
+        default: null,
+        required: false
     },
     next_Of_Kin: {
         type: String,
-        required: true
+        default: null,
+        required: false
     },
     next_Of_Kin_Number: {
         type: String,
-        required: true
+        default: null,
+        required: false
     },
     next_Of_Kin_Relationship: {
         type: String,
-        required: true
+        enum: ['brother', 'father', 'mother', 'sister', 'others'],
+        default: null,
+        required: false
     },
     password: {
         type: String,

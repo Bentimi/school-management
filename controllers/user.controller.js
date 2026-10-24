@@ -93,6 +93,7 @@ const user_Profile = async (req, res, next) => {
         const user = await userService.userProfile(userId);
         res.success({ user }, "User profile retrieved successfully");
     } catch (e) {
+        console.log(e)
         next(e);
     }
 }
@@ -228,6 +229,7 @@ const change_Password = async (req, res, next) => {
         const userId = req.user.id
         const refreshToken = req.cookies.refreshToken
         const data = req.body;
+        // console.log(data)
 
         const result = await userService.changePassword(userId, data)
         if (refreshToken) {
@@ -235,6 +237,7 @@ const change_Password = async (req, res, next) => {
         } 
         res.success(result, "Password Changed")
     } catch (e) {
+        // console.log(e)
         next(e);
     }
 }
@@ -244,7 +247,7 @@ const forget_Password = async (req, res, next) => {
         const data = req.body;
 
         const user = await userService.forgetPassword(data);
-        res.success(null, "reset password link has been sent the provided email")
+        res.success(null, "reset password link has been sent to the provided email")
     } catch (e) {
         next(e);
     }
@@ -255,8 +258,9 @@ const reset_Password = async (req, res, next) => {
         const token = req.query.token;
         const data = req.body;
         const user = await userService.resetPassword(token, data);
-        res.success(user, "password reset done")
+        res.success(null, "password reset done")
     } catch (e) {
+        console.log(e)
         next (e);
     }
 }
@@ -272,6 +276,49 @@ const user_Delete = async (req, res, next) => {
     }
 }
 
+const get_Users = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const search = req.query.search || ''
+
+        const data = await userService.getUsers(userId, page, pageSize, search);
+
+        console.log(data)
+        res.success(data, "Users successfully retrieved")
+    } catch (e) {
+        // console.log(e)
+        next (e);
+    }
+}
+
+const edit_User = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const data = req.body;
+        const targetId = req.params.id;
+
+        const user =  await userService.editUser(userId, data, targetId);
+        res.success(user, 'Profile Updated Successfully')
+    } catch (e) {
+        console.log(e)
+        next (e);
+    }
+}
+
+const users_Profile = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const targetId = req.params.id;
+        const user = await userService.usersProfile(userId, targetId);
+        res.success(user, "User profile retrieved successfully");
+    } catch (e) {
+        console.log(e)
+        next(e);
+    }
+}
+
 module.exports = {
     create_User,
     login_User,
@@ -281,5 +328,8 @@ module.exports = {
     change_Password,
     forget_Password,
     reset_Password,
-    user_Delete
+    user_Delete,
+    get_Users,
+    edit_User,
+    users_Profile
 }

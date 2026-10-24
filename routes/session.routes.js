@@ -12,8 +12,10 @@ const isAuth = passport.authenticate('jwt', { session: false });
 // Routes
 router.post('/create', csrfProtection, isAuth, sessionData.addSession, sessionController. create_Session);
 router.put('/:sessionId', csrfProtection, isAuth, sessionData.addSession, sessionController.update_Session);
-router.get('/:sessionId', isAuth, sessionController.get_Session);
-router.delete('/:sessionId', isAuth, sessionController.delete_Session);
-router.get('/', isAuth, sessionController.all_Session);
+router.get('/:sessionId', isAuth, csrfProtection, sessionController.get_Session);
+router.delete('/:sessionId', isAuth, csrfProtection, sessionController.delete_Session);
+router.patch('/:sessionId', isAuth, csrfProtection, sessionController.session_status);
+router.get('/', isAuth, csrfProtection, sessionController.all_Session);
+router.put('/verify/:sessionId', isAuth, csrfProtection, sessionData.sessionVerification, sessionController.session_verification);
 
 module.exports = router;

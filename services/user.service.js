@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const AppError = require("../utils/AppError.utils");
 const hashedToken = require("../utils/hash.utils");
 const mongoose = require("mongoose");
+const { normalizePhoneNumber } = require("../utils/numberNormalization.utils");
 
 
 dotenv.config();
@@ -66,6 +67,10 @@ const loginUser = async (data) => {
         throw new AppError("Invalid credentials", 404)
     }
 
+    if (!user.active) {
+        throw new AppError("Account not activated", 404)
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -88,10 +93,14 @@ const loginUser = async (data) => {
 
 // User profile
 const userProfile = async (userId) => {
-    const user = await User.findById(userId).select('-password -refreshTokens');
+    const user = await User.findById(userId).select('-password -resetToken -resetExpires');
 
     if (!user) {
         throw new AppError("User not found", 404);
+    }
+
+    if (!user.active) {
+        throw new AppError("Unauthorized", 401);
     } 
     
     return user;
@@ -185,7 +194,7 @@ const changePassword = async (userId, data) => {
 
     const isMatch = await bcrypt.compare(data.newPassword, user.password)
 
-    if (!isMatch) {
+    if (isMatch) {
         throw new AppError("New and old passwords cannot be the same", 400)
     }
 
@@ -221,28 +230,26 @@ const forgetPassword = async (data) => {
     const existingUser = await User.findOne({
         email: data.email
     }).select('-password')
-    if(!existingUser) {
-        throw new AppError("Invalid email", 404)
+    if(existingUser) {
+        // throw new AppError("Invalid email", 404)
+    
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedResetToken = hashedToken(resetToken);
+
+        existingUser.resetToken = hashedResetToken;
+        existingUser.resetExpires = new Date(Date.now() + 30 * 60 * 1000);
+
+        await existingUser.save();
+        const result = existingUser.toObject();
+        delete result.password;
+        delete result.refreshTokens;
+        delete result.resetExpires;
+
+        const resetUrl = `${process.env.FRONTEND_URL}/user/reset-password?token=${resetToken}`;
+        console.log(resetUrl)
     }
-
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const hashedResetToken = hashedToken(resetToken);
-
-    existingUser.resetToken = hashedResetToken;
-    existingUser.resetExpires = new Date(Date.now() + 30 * 60 * 1000);
-
-    await existingUser.save();
-    const result = existingUser.toObject();
-    delete result.password;
-    delete result.refreshTokens;
-    delete result.resetExpires;
-
-     const resetUrl = `${process.env.FRONTEND_URL}/account/reset-password?token=${resetToken}`;
-
-    return {
-        user: result,
-        link: resetUrl
-    }
+    return null;
 }
 
 const resetPassword = async (token, data) => {
@@ -253,7 +260,7 @@ const resetPassword = async (token, data) => {
         resetExpires:{ $gt: Date.now() }
     });
 
-    if (!exisitngToken) {
+    if (!existingToken) {
         throw new AppError("Invalid or expired reset token", 400)
     }
 
@@ -263,7 +270,7 @@ const resetPassword = async (token, data) => {
 
     const isMatch = await bcrypt.compare(data.newPassword, existingToken.password)
 
-    if (!isMatch) {
+    if (isMatch) {
         throw new AppError("New password cannot be the same as old", 400)
     }
 
@@ -298,6 +305,10 @@ const userDelete = async (userId, targetId) => {
         throw new AppError("Unauthorized user", 401);
     }
 
+    const userAuth = await User.findById(userId)
+    if (!userAuth) {
+        throw new AppError('User not found', 400)
+    }
     
     if (!mongoose.Types.ObjectId.isValid(targetId)) {
         throw new AppError("Invalid taget Id", 400);
@@ -325,6 +336,135 @@ const userDelete = async (userId, targetId) => {
 
 } 
 
+const getUsers = async (userId, page, pageSize, search) => {
+     if (!userId) {
+        throw new AppError("Unauthorized user", 401);
+    }
+
+    const user = await User.findById(userId)
+    if (!user) {
+        throw new AppError("User not found", 404)
+    }
+
+    if (!user.active) {
+        throw new AppError("Unauthorized user", 403)
+    }
+
+    const allowedRole = ['student', 'user', 'aspirant']
+    if (allowedRole.includes(user.role)) {
+        throw new AppError('Forbidden Request', 403)
+    }
+
+    //  if (pageSize > 100) {
+    //     pageSize = 100
+    // }
+    console.log('page' + page)
+
+    let queryFilter = {};
+
+    if (search) {
+        const searchValue = {
+            $regex: search, $options: 'i'
+        };
+
+
+        queryFilter = {
+            $or: [
+                {first_name: searchValue},
+                {last_name: searchValue},
+                {email: searchValue},
+                {department: searchValue},
+                {gender: searchValue}
+            ]
+        }
+    }
+
+
+    
+    const users = await User.find(queryFilter)
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .select('-password -resetToken -resetExpires')
+    .lean()
+    const total = await User.countDocuments(queryFilter);
+
+    return { users, total };
+} 
+
+const editUser = async (userId, data, targetId) => {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new AppError('Unauthorized User', 401)
+    }
+
+    const userAuth = await User.findById(userId);
+    if (!userAuth) {
+        throw new AppError("User does not exist", 400)
+    }
+
+    if (!userAuth.active) {
+        throw new AppError("Account not activated")
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+        throw new AppError('Invalid user', 400)
+    }
+
+    if ((userId !== targetId) && (userAuth.role !== 'admin')) {
+        throw new AppError('Forbidden Access', 403)
+    }
+
+    if (data.phone_number) {
+        data.phone_number = normalizePhoneNumber(data.phone_number)
+        data.next_Of_Kin_Number = normalizePhoneNumber(data.next_Of_Kin_Number)
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+        targetId,
+        {
+            ...data
+        },
+        {
+            new: true,
+            runValidatords:true
+        }
+    ).select('-password -resetToken -resetExpires')
+
+    return {
+        user: updatedUser
+    }
+}
+
+const usersProfile = async (userId, targetId) => {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new AppError('Unauthorized User', 401)
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(targetId)) {
+        throw new AppError('Invalid user', 400)
+    }
+
+    const userAuth = await User.findById(userId);
+    if (!userAuth) {
+        throw new AppError("User does not exist", 400)
+    }
+
+     if (!userAuth.active) {
+        throw new AppError("Account not activated")
+    }
+
+    const allowedRole = ['student', 'user', 'aspirant']
+    if ((allowedRole.includes(userAuth.role)) && (userId !== targetId)) {
+        throw new AppError('Forbidden Access', 403)
+    }
+    const user = await User.findById(targetId).select('-password -resetToken -resetExpires');
+
+    if (!user) {
+        throw new AppError("User not found", 404);
+    } 
+    
+    return user;
+}
+
 module.exports =  {
     createUser,
     loginUser,
@@ -339,5 +479,8 @@ module.exports =  {
     changePassword,
     forgetPassword,
     resetPassword,
-    userDelete
+    userDelete,
+    getUsers,
+    editUser,
+    usersProfile
 }

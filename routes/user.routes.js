@@ -12,12 +12,15 @@ const isAuth = passport.authenticate('jwt', { session: false })
 // Routes
 router.post('/register', validatedData.validatedUserSchema, userController.create_User);
 router.post('/login', validatedData.validatedLoginSchema, userController.login_User);
+router.post('/forget-password', validatedData.validatedForgetPasswordSchema, userController.forget_Password);
+router.patch('/reset-password', validatedData.validatedResetPasswordSchema,userController.reset_Password);
 router.post('/refresh', userController.refresh_Token);
 router.get('/user-profile', csrfProtection, isAuth, userController.user_Profile);
 router.post('/logout', csrfProtection, isAuth, userController.logout_User);
-router.post('/change-password', csrfProtection, isAuth, validatedData.validatedChangePasswordSchema,userController.change_Password);
-router.post('/forget-password', csrfProtection, isAuth, validatedData.validatedForgetPasswordSchema,userController.forget_Password);
-router.post('/reset-password', csrfProtection, isAuth, validatedData.validatedResetPasswordSchema,userController.reset_Password);
+router.put('/change-password', csrfProtection, isAuth, validatedData.validatedChangePasswordSchema, userController.change_Password);
 router.delete('/delete/:id', csrfProtection, isAuth, userController.user_Delete);
+router.get('/users', csrfProtection, isAuth, userController.get_Users);
+router.patch('/:id', csrfProtection, isAuth, validatedData.validatedEditUserSchema, userController.edit_User);
+router.get('/profile/:id', csrfProtection, isAuth, userController.users_Profile);
 
 module.exports = router;

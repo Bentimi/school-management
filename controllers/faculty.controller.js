@@ -16,6 +16,22 @@ const add_faculty = async (req, res, next) => {
     }
 }
 
+const all_faculty = async (req, res, next) => {
+    try {
+
+        const userId = req.user.id;
+        const pageSize = parseInt(req.query.pageSize) > 1 ? parseInt(req.query.pageSize) : 10;
+        const page = parseInt(req.query.page) || 1;
+        const search = req.query.search || '';
+
+        const result = await facultyService.allFaculty(userId, page, pageSize, search);
+        res.success("Data successfully retrieved", result)
+    } catch (e) {
+        next (e)
+    }
+}
+
 module.exports = {
-    add_faculty
+    add_faculty,
+    all_faculty
 }

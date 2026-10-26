@@ -10,5 +10,7 @@ const isAuth = passport.authenticate('jwt', { session: false });
 
 // Routes
 router.post('/create', csrfProtection, isAuth, facultyData.addfaculty, facultyController.add_faculty);
+router.get('/', csrfProtection, isAuth, facultyController.all_faculty);
+
 
 module.exports = router;

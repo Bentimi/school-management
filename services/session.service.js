@@ -167,7 +167,7 @@ const allSession = async (userId, pageSize, page, search) => {
         queryFilter = {
             $or: [
                 { session: searchValue },
-                { createdBy: searchRegex }
+                { createdBy: searchValue }
             ]
         }
     }

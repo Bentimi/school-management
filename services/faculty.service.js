@@ -54,7 +54,7 @@ const allFaculty = async (userId, page, pageSize,search) => {
         }
     }
 
-    const faculty = await Faculty.find()
+    const faculty = await Faculty.find(queryFilter)
     .populate("lastUpdatedBy", "first_name last_name email")
         .populate("createdBy", "first_name last_name email")
         .sort({ updatedAt: -1 })
@@ -62,8 +62,17 @@ const allFaculty = async (userId, page, pageSize,search) => {
         .limit(pageSize)
         .lean()
         const total = await Faculty.countDocuments(queryFilter)
+        const activeTotal = await Faculty.countDocuments({
+            ...queryFilter,
+            isActive:true
+        })
+        const inActiveTotal = await Faculty.countDocuments({
+            ...queryFilter,
+            isActive:false
+        })
+        console.log(inActiveTotal)
     
-        return { faculty, total};
+        return { faculty, total, activeTotal, inActiveTotal};
 }
 
 module.exports = {

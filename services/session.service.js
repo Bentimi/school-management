@@ -184,6 +184,7 @@ const allSession = async (userId, pageSize, page, search) => {
     .limit(pageSize)
     .lean()
     const total = await Session.countDocuments(queryFilter)
+    // console.log(total)
 
     return { sessions, total};
 }

@@ -8,7 +8,7 @@ const addFaculty = async (userId, data) => {
         throw new AppError("User not found", 404)
     }
 
-    if (!user.active) {
+    if (!userAuth.active) {
         throw new AppError("Account not activated", 403)
     }
 
@@ -35,7 +35,7 @@ const allFaculty = async (userId, page, pageSize,search) => {
         throw new AppError("User not found", 404)
     }
 
-    if (!user.active) {
+    if (!userAuth.active) {
         throw new AppError("Account not activated", 403)
     }
 
@@ -61,7 +61,7 @@ const allFaculty = async (userId, page, pageSize,search) => {
         .skip((page - 1) * pageSize)
         .limit(pageSize)
         .lean()
-        const total = await Session.countDocuments(queryFilter)
+        const total = await Faculty.countDocuments(queryFilter)
     
         return { faculty, total};
 }

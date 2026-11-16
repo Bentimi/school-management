@@ -12,6 +12,7 @@ const add_faculty = async (req, res, next) => {
             result
         })
     } catch (e) {
+        console.log(e)
         next (e)
     }
 }
@@ -25,8 +26,9 @@ const all_faculty = async (req, res, next) => {
         const search = req.query.search || '';
 
         const result = await facultyService.allFaculty(userId, page, pageSize, search);
-        res.success("Data successfully retrieved", result)
+        res.success(result, "Data successfully retrieved")
     } catch (e) {
+        console.log(e)
         next (e)
     }
 }

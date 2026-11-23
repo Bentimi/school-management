@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const Session = require("../models/session.model");
 const AppError = require("../utils/AppError.utils");
 const mongoose = require("mongoose");
+const { uniqueCheck } = require("../utils/valueChecker");
 
 const createSession = async (userId, data) => {
     if (!userId) {
@@ -13,7 +14,7 @@ const createSession = async (userId, data) => {
     }
 
     const existingSession = await Session.findOne({
-        session: data.session
+        session: uniqueCheck(data.session)
     })
 
     if (existingSession) {
@@ -62,7 +63,8 @@ const updateSession = async (userId, sessionId, data) => {
     }
 
     const existingSession = await Session.findOne({
-        session: data.session, _id: {
+        session: uniqueCheck(data.session), 
+        _id: {
             $ne: sessionId
         }
     });
@@ -80,7 +82,7 @@ const updateSession = async (userId, sessionId, data) => {
             startDate: data.startDate,
             lastUpdatedBy: userId
         },
-        { returnDocument: "after" }
+        { returnDocument: "after", revalidators: true }
     )
     .populate('lastUpdatedBy', 'first_name last_name email')
     .populate('createdBy', 'first_name last_name email')

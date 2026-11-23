@@ -2,6 +2,7 @@ const User = require('../models/user.model');
 const Faculty = require('../models/faculty.model');
 const AppError = require('../utils/AppError.utils');
 const mongoose = require('mongoose');
+const { uniqueCheck } = require('../utils/valueChecker');
 
 const addFaculty = async (userId, data) => {
     const userAuth = await User.findById(userId);
@@ -18,7 +19,7 @@ const addFaculty = async (userId, data) => {
     }
 
     const existingFaculty  = await Faculty.findOne({
-        faculty: data.faculty
+        faculty: uniqueCheck(data.faculty)
     })
 
     if (existingFaculty) {
@@ -79,7 +80,7 @@ const allFaculty = async (userId, page, pageSize,search) => {
             ...queryFilter,
             isActive:false
         })
-        console.log(inActiveTotal)
+        // console.log(inActiveTotal)
     
         return { faculty, total, activeTotal, inActiveTotal};
 }
@@ -93,7 +94,7 @@ const editFaculty = async (userId, facultyId, data) => {
             throw new AppError('Invalid faculty', 400)
     }
 
-        const userAuth = await User.findById(userId);
+    const userAuth = await User.findById(userId);
 
     if (!userAuth) {
         throw new AppError('User not found', 404);
@@ -114,13 +115,26 @@ const editFaculty = async (userId, facultyId, data) => {
         throw new AppError("All fields required", 400);
     }
 
+
+    const existedFaculty = await Faculty.findOne({
+        faculty: uniqueCheck(data.faculty), 
+        _id: {
+            $ne: facultyId
+        }
+    });
+
+    if (existedFaculty) {
+        throw new AppError('Faculty already exists', 409)
+    }
+
     const existingFaculty = await Faculty.findByIdAndUpdate(
         facultyId, 
         {
             ...data,
             lastUpdatedBy: userAuth._id
         }, {
-            returnDocument: "after"
+            returnDocument: "after",
+            revalidators: true
         }
     )
     .populate('lastUpdatedBy', 'first_name last_name email')
@@ -133,11 +147,63 @@ const editFaculty = async (userId, facultyId, data) => {
     return {
         faculty: existingFaculty
     }
+}
 
+const facultyStatus = async (userId, facultyId) => {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new AppError('Unauthorized user', 401)
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(facultyId)) {
+        throw new AppError('Invalid faculty', 400)
+    }
+
+    const userAuth = await User.findById(userId);
+
+    if (!userAuth) {
+        throw new AppError('User not found', 404);
+    }
+
+    if (!userAuth.active) {
+        throw new AppError('Account not activated', 403);
+    }
+
+
+    const allowedRole = ['student', 'user', 'aspirant']
+
+    if (allowedRole.includes(userAuth.role)) {
+        throw new AppError('Forbidden Access', 403);
+    }
+
+    const existingFaculty = await Faculty.findById(facultyId)
+    .populate("lastUpdatedBy", "first_name last_name email")
+    .populate("createdBy", "first_name last_name email")
+
+    if (!existingFaculty) {
+        throw new AppError('Data do not exist', 400)
+    }
+
+    let isStatus;
+    let msg;
+    if (existingFaculty.isActive) {
+        isStatus = false;
+        msg = 'Faculty successfully deactivated'
+    } else {
+        isStatus = true;
+        msg = 'Faculty successfully activated'
+    }
+
+    existingFaculty.isActive = isStatus;
+    await existingFaculty.save()
+    return {
+        faculty: existingFaculty,
+        msg
+    }
 }
 
 module.exports = {
     addFaculty,
     allFaculty,
-    editFaculty
+    editFaculty,
+    facultyStatus
 }

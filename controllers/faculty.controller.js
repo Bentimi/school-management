@@ -50,8 +50,26 @@ const edit_faculty = async (req, res, next) => {
     }
 }
 
+const faculty_status = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const facultyId = req.params.id;
+        
+        const result =  await facultyService.facultyStatus(userId, facultyId);
+       res.status(200).json({
+        status: "Success",
+        message: result.msg,
+        data: result.faculty,
+       })
+    } catch (e) {
+        console.log(e);
+        next (e);
+    }
+}
+
 module.exports = {
     add_faculty,
     all_faculty,
-    edit_faculty
+    edit_faculty,
+    faculty_status
 }

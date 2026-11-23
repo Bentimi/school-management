@@ -12,7 +12,7 @@ const add_faculty = async (req, res, next) => {
             result
         })
     } catch (e) {
-        console.log(e)
+        // console.log(e)
         next (e)
     }
 }
@@ -28,6 +28,23 @@ const all_faculty = async (req, res, next) => {
         const result = await facultyService.allFaculty(userId, page, pageSize, search);
         res.success(result, "Data successfully retrieved")
     } catch (e) {
+        // console.log(e)
+        next (e)
+    }
+}
+
+const edit_faculty = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const facultyId = req.params.id;
+        const data = req.body;
+
+        // console.log(facultyId)
+
+        const result = await facultyService.editFaculty(userId, facultyId, data);
+        // console.log(result)
+        res.success(result, 'Data successfully updated')
+    } catch (e) {
         console.log(e)
         next (e)
     }
@@ -35,5 +52,6 @@ const all_faculty = async (req, res, next) => {
 
 module.exports = {
     add_faculty,
-    all_faculty
+    all_faculty,
+    edit_faculty
 }

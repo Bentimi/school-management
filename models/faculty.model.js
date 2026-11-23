@@ -4,7 +4,8 @@ const facultySchema = new mongoose.Schema({
     faculty: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        unique: true
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,

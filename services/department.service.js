@@ -56,6 +56,11 @@ const addDepartment = async (userId, data) => {
     }
 }
 
+const editDepartment = async (userId, departmentId, data) => {
+
+}
+
 module.exports = {
-    addDepartment
+    addDepartment,
+    editDepartment
 }

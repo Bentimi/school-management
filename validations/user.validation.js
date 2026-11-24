@@ -5,6 +5,7 @@ const userSchema = joi.object({
     first_name: joi.string().trim().required(),
     last_name : joi.string().trim().required(),
     email : joi.string().email().trim().required(),
+    phone_number : joi.string().trim().required(),
     password: joi.string().trim()
     .min(8)
     .max(30)
@@ -52,7 +53,7 @@ const editUserSchema = joi.object({
     first_name: joi.string().trim().max(30).required(),
     last_name : joi.string().trim().max(30).required(),
     email : joi.string().email().trim().max(500).optional(),
-    phone_number : joi.string().trim().optional(),
+    phone_number : joi.string().trim().required(),
     dob : joi.date().optional(),
     state_Of_Origin : joi.string().trim().max(20).optional(),
     next_Of_Kin : joi.string().trim().optional(),

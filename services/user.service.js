@@ -27,6 +27,13 @@ const createUser = async (data) => {
         throw new AppError("Email already exists", 409)
     }
 
+    const existingPhoneNumber = await User.findOne({
+        phone_number: normalizePhoneNumber(data.phone_number)
+    })
+
+    if (existingPhoneNumber) {
+        throw new AppError("Phone number already exists", 409)
+    }
 
     const hashedPwd = await bcrypt.hash(data.password, 10)
 
@@ -34,6 +41,7 @@ const createUser = async (data) => {
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
+        phone_number: normalizePhoneNumber(data.phone_number),
         password: hashedPwd
     })
 

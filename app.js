@@ -10,6 +10,7 @@ const { errorHandler } = require("./middleware/errorHandler.middleware");
 const UserRoutes = require("./routes/user.routes");
 const SessionRoutes = require("./routes/session.routes");
 const FacultyRoutes = require("./routes/faculty.routes");
+const DepartmentRoutes = require("./routes/department.routes");
 
 
 const passport = require("passport");
@@ -86,6 +87,7 @@ const swaggerOptions = {
    app.use("/account", UserRoutes);
    app.use("/session", SessionRoutes);
    app.use("/faculty", FacultyRoutes);
+   app.use("/department", DepartmentRoutes);
 
    app.use(errorHandler)
 

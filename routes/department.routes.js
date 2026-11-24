@@ -9,6 +9,6 @@ const passport = require("../config/passport.config");
 const isAuth = passport.authenticate('jwt', { session: false });
 
 // Routes
-router.post('/add', csrfProtection, isAuth, departmentController.add_Department);
+router.post('/add', csrfProtection, isAuth, departmentData.addDepartment, departmentController.add_Department);
 
 module.exports = router;

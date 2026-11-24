@@ -22,6 +22,10 @@ const addDepartment = async (userId, data) => {
         throw new AppError("Forbidden Access", 403)
     }
 
+    if (!data.department || !data.faculty) {
+        throw new AppError("All fields required", 400)
+    }
+
     const existingFaculty = await Faculty.findOne({
         faculty: data.faculty
     });

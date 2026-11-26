@@ -35,7 +35,7 @@ const addDepartment = async (userId, data) => {
     const existingDepartment = await Department.findOne({
         department: uniqueCheck(data.department)
     })
-    
+
     if (existingDepartment) {
         throw new AppError("Department already exists", 409)
     }
@@ -58,9 +58,12 @@ const editDepartment = async (userId, departmentId, data) => {
 
 }
 
-// const get
+const allDepartment = async (userId, page, pageSize, search) => {
+    
+}
 
 module.exports = {
     addDepartment,
-    editDepartment
+    editDepartment,
+    allDepartment
 }

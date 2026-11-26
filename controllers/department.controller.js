@@ -19,6 +19,22 @@ const add_Department = async (req, res, next) => {
     }
 }
 
+const all_Department = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const pageSize = parseInt(req.query.pageSize) > 1 ? parseInt(req.query.pageSize) : 10;
+        const page = parseInt(req.query.page) || 1;
+        const search = req.query.search || '';
+
+        const result = await departmentService.allDepartment(userId, page, pageSize, search);
+        res.success(result, "Data successfully retrieved")
+        
+    } catch (e) {
+        console.log(e)
+        next (e)
+    }
+}
 module.exports = {
-    add_Department
+    add_Department,
+    all_Department
 }

@@ -26,9 +26,7 @@ const addDepartment = async (userId, data) => {
         throw new AppError("All fields required", 400)
     }
 
-    const existingFaculty = await Faculty.findOne({
-        faculty: data.faculty
-    });
+    const existingFaculty = await Faculty.findById(data.faculty);
 
     if (!existingFaculty) {
         throw new AppError("Faculty not found", 404);
@@ -37,7 +35,7 @@ const addDepartment = async (userId, data) => {
     const existingDepartment = await Department.findOne({
         department: uniqueCheck(data.department)
     })
-
+    
     if (existingDepartment) {
         throw new AppError("Department already exists", 409)
     }
@@ -59,6 +57,8 @@ const addDepartment = async (userId, data) => {
 const editDepartment = async (userId, departmentId, data) => {
 
 }
+
+// const get
 
 module.exports = {
     addDepartment,

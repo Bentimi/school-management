@@ -2,7 +2,7 @@ const mongoose =  require("mongoose");
 
 const departmentSchema = new mongoose.Schema({
     department: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         required: true,
         trim: true
     },
@@ -20,7 +20,7 @@ const departmentSchema = new mongoose.Schema({
     lastUpdatedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        default: null
     },
     isActive: {
         type: Boolean,

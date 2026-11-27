@@ -11,5 +11,6 @@ const isAuth = passport.authenticate('jwt', { session: false });
 // Routes
 router.post('/add', csrfProtection, isAuth, departmentData.addDepartment, departmentController.add_Department);
 router.get('/', csrfProtection, isAuth, departmentController.all_Department);
+router.put('/', csrfProtection, isAuth, departmentData.addDepartment, departmentController.edit_Department);
 
 module.exports = router;

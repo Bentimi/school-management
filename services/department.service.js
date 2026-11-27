@@ -59,7 +59,19 @@ const editDepartment = async (userId, departmentId, data) => {
 }
 
 const allDepartment = async (userId, page, pageSize, search) => {
-    
+    const userAuth = await User.findById(userId);
+
+    if (!userAuth) {
+        throw new AppError("User not found", 404)
+    }
+
+    const departments = await Department.find()
+    .populate('faculty', 'faculty')
+    .populate('createdBy', 'firstName lastName email')
+    .populate('lastUpdatedBy', 'firstName lastName email')
+
+    return departments;
+
 }
 
 module.exports = {

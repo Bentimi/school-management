@@ -34,7 +34,22 @@ const all_Department = async (req, res, next) => {
         next (e)
     }
 }
+
+const edit_Department = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const departmentId = req.params.id;
+        const data =  req.body;
+
+        const result = await departmentService.editDepartment(userId, departmentId, data);
+        res.success(result, "Data updated successfully")
+    } catch (e) {
+        console.log(e)
+        next(e)
+    }
+}
 module.exports = {
     add_Department,
-    all_Department
+    all_Department,
+    edit_Department
 }

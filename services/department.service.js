@@ -54,15 +54,15 @@ const addDepartment = async (userId, data) => {
     }
 }
 
-const editDepartment = async (userId, departmentId, data) => {
-
-}
-
 const allDepartment = async (userId, page, pageSize, search) => {
     const userAuth = await User.findById(userId);
 
     if (!userAuth) {
         throw new AppError("User not found", 404)
+    }
+
+    if (!userAuth.active) {
+        throw new AppError("Account not activated", 403)
     }
 
     const departments = await Department.find()
@@ -74,8 +74,74 @@ const allDepartment = async (userId, page, pageSize, search) => {
 
 }
 
+const editDepartment = async (userId, departmentId, data) => {
+    const userAuth = await User.findById(userId);
+
+    if (!userAuth) {
+        throw new AppError('User not found', 404)
+    }
+
+    if (!userAuth.active) {
+        throw new AppError("Account not activated", 403)
+    }
+
+    const notAllowedRoles  = ['student', 'lecturer', 'staff'];
+
+    if (notAllowedRoles.includes(userAuth.role)) {
+        throw new AppError("Forbidden Access", 403)
+    }
+
+    if (!data.department || !data.faculty) {
+        throw new AppError("All fields required", 400)
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(departmentId)) {
+        throw new AppError("Inavlid department", 400)
+    }
+
+    const existingFaculty = await Faculty.findById(data.faculty);
+
+    if (!existingFaculty) {
+        throw new AppError("Faculty not found", 404);
+    }
+
+
+    const existingDepartment = await Department.findOne({
+        faculty: uniqueCheck(data.department),
+        _id: {
+            $ne: departmentId
+        }
+    });
+
+    if (existingDepartment) {
+        throw new AppError('Department already exists', 409)
+    }
+
+    const updatedDepartment = await Department.findByIdAndUpdate(
+        departmentId,
+        {
+            ...data,
+            lastUpdatedBy: userAuth._id
+        }, {
+            returnDocument: "after",
+            revalidators: true
+        }
+    )
+    .populate('faculty', 'faculty')
+    .populate('createdBy', 'firstName lastName email')
+    .populate('lastUpdatedBy', 'firstName lastName email')
+
+    if (!updatedDepartment) {
+        throw new AppError("Faculty do not exist", 404)
+    }
+
+    return {
+        department: updatedDepartment
+    }
+}
+
 module.exports = {
     addDepartment,
-    editDepartment,
-    allDepartment
+    allDepartment,
+    editDepartment
 }
